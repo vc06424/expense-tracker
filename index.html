@@ -1,0 +1,324 @@
+import React, { useState, useMemo } from 'react';
+import { 
+  ChevronLeft, 
+  ChevronRight, 
+  Settings as SettingsIcon, 
+  Grid, 
+  Wine, 
+  Home, 
+  Utensils, 
+  Baby, 
+  ShoppingCart, 
+  Train, 
+  ShoppingBag, 
+  Film, 
+  MoreHorizontal,
+  Info,
+  ChevronDown,
+  ChevronUp
+} from 'lucide-react';
+
+
+const INITIAL_BUDGETS = {
+  Living: 6600,
+  Housing: 15000,
+  Meals: 4000,
+  BBNecessities: 2000,
+  Groceries: 1500,
+  Transport: 500,
+  Shopping: 1000,
+  Entertainment: 500,
+  Others: 500
+};
+
+const EXPENSES = [
+  { id: '1', category: 'Living', amount: 3177.00, items: 10, icon: Wine, color: 'text-purple-400', bg: 'bg-purple-400/20' },
+  { id: '2', category: 'Housing', amount: 12560.00, items: 2, icon: Home, color: 'text-blue-400', bg: 'bg-blue-400/20' },
+  { id: '3', category: 'Meals', amount: 3206.10, items: 24, icon: Utensils, color: 'text-orange-400', bg: 'bg-orange-400/20' },
+  { id: '4', category: 'BBNecessities', label: 'BB Necessities', amount: 1725.00, items: 5, icon: Baby, color: 'text-pink-400', bg: 'bg-pink-400/20' },
+  { id: '5', category: 'Groceries', amount: 1305.10, items: 6, icon: ShoppingCart, color: 'text-green-400', bg: 'bg-green-400/20' },
+  { id: '6', category: 'Transport', amount: 296.40, items: 18, icon: Train, color: 'text-teal-400', bg: 'bg-teal-400/20' },
+  { id: '7', category: 'Shopping', amount: 65.00, items: 1, icon: ShoppingBag, color: 'text-yellow-400', bg: 'bg-yellow-400/20' },
+  { id: '8', category: 'Entertainment', amount: 17.00, items: 1, icon: Film, color: 'text-indigo-400', bg: 'bg-indigo-400/20' },
+  { id: '9', category: 'Others', amount: 0.00, items: 0, icon: MoreHorizontal, color: 'text-gray-400', bg: 'bg-gray-400/20' }
+];
+
+const INCOMES = [
+  { source: 'Job', amount: 30000 },
+  { source: 'Investment', amount: 10000 }
+];
+
+const GROUPS = [
+  { name: 'Project', keys: ['Living', 'Housing'] },
+  { name: 'Unallocated', keys: ['Meals', 'BBNecessities', 'Groceries', 'Transport'] },
+  { name: 'Unset', keys: ['Shopping', 'Entertainment', 'Others'] }
+];
+
+
+const Dashboard = ({ setView, budgets, expenses, incomes }) => {
+  const [showRemarks, setShowRemarks] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState({
+    Project: true,
+    Unallocated: true,
+    Unset: true
+  });
+
+  const totalOutflow = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+  const totalOutflowItems = expenses.reduce((sum, exp) => sum + exp.items, 0);
+  
+  const totalInflow = incomes.reduce((sum, inc) => sum + inc.amount, 0);
+  const totalInflowItems = incomes.length;
+  
+  const netTotal = totalInflow - totalOutflow;
+
+  const toggleGroup = (groupName) => {
+    setExpandedGroups(prev => ({ ...prev, [groupName]: !prev[groupName] }));
+  };
+
+  const formatCurrency = (val) => `HK$${val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  return (
+    <div className="flex flex-col h-full overflow-y-auto pb-10">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 pt-6 sticky top-0 bg-[#1A1A24] z-10">
+        <button className="p-2 bg-gray-800/50 rounded-full text-gray-300 hover:text-white">
+          <ChevronLeft size={20} />
+        </button>
+        <h1 className="text-lg font-semibold tracking-wide">Living</h1>
+        <div className="flex gap-3">
+          <button onClick={() => setView('settings')} className="p-2 text-gray-400 hover:text-white">
+            <SettingsIcon size={20} />
+          </button>
+          <button className="p-2 text-gray-400 hover:text-white">
+            <Grid size={20} />
+          </button>
+        </div>
+      </div>
+
+      {/* Date Picker */}
+      <div className="flex items-center justify-center gap-4 py-2">
+        <ChevronLeft size={16} className="text-gray-500" />
+        <span className="text-sm font-medium text-gray-300">09/01/2026 – 09/30/2026</span>
+        <ChevronRight size={16} className="text-gray-500" />
+      </div>
+
+      
+      {/* Summary Section */}
+      <div className="px-5 py-4 space-y-5">
+        {/* Outflow */}
+        <div className="space-y-1 relative">
+          <div className="flex justify-between items-center text-sm">
+            <div className="flex items-center gap-2">
+              <span className="text-gray-400">Outflow</span>
+              <span className="bg-[#FF4D4D] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{totalOutflowItems}</span>
+            </div>
+            <span className="text-[#FF4D4D] font-semibold">-{formatCurrency(totalOutflow)}</span>
+          </div>
+          <div className="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden">
+            <div className="bg-[#FF4D4D] h-full rounded-full" style={{ width: `${Math.min((totalOutflow / totalInflow) * 100, 100)}%` }}></div>
+          </div>
+        </div>
+
+        {/* Inflow */}
+        <div className="space-y-1 relative">
+          <div className="flex justify-between items-center text-sm">
+            <div className="flex items-center gap-2">
+              <span className="text-gray-400">Inflow</span>
+              <span className="bg-[#4CAF50] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{totalInflowItems}</span>
+              <button 
+                onClick={() => setShowRemarks(!showRemarks)}
+                className="flex items-center gap-1 text-xs text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded ml-1"
+              >
+                <Info size={12} /> Remarks
+              </button>
+            </div>
+            <span className="text-[#4CAF50] font-semibold">{formatCurrency(totalInflow)}</span>
+          </div>
+          <div className="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden">
+            <div className="bg-[#4CAF50] h-full rounded-full" style={{ width: '100%' }}></div>
+          </div>
+          
+          {/* Remarks Dropdown */}
+          {showRemarks && (
+            <div className="absolute top-6 left-16 bg-gray-800 border border-gray-700 rounded-lg p-3 shadow-xl z-20 w-48 text-sm">
+              <h4 className="text-gray-400 mb-2 text-xs uppercase tracking-wider">Income Sources</h4>
+              {incomes.map((inc, idx) => (
+                <div key={idx} className="flex justify-between py-1">
+                  <span>{inc.source}</span>
+                  <span className="text-[#4CAF50]">{formatCurrency(inc.amount)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Summary */}
+        <div className="space-y-1">
+          <div className="flex justify-between items-center text-sm">
+            <div className="flex items-center gap-2">
+              <span className="text-gray-400">Summary</span>
+              <span className="bg-[#9C27B0] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{totalOutflowItems + totalInflowItems}</span>
+            </div>
+            <span className="text-[#9C27B0] font-semibold">{netTotal >= 0 ? '+' : ''}{formatCurrency(netTotal)}</span>
+          </div>
+          <div className="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden">
+            <div className="bg-[#9C27B0] h-full rounded-full" style={{ width: `${Math.max(0, Math.min((netTotal / totalInflow) * 100, 100))}%` }}></div>
+          </div>
+        </div>
+      </div>
+
+
+      {/* List View */}
+      <div className="mt-4 pb-8">
+        {GROUPS.map((group) => (
+          <div key={group.name} className="mb-4">
+            {/* Accordion Header */}
+            <div 
+              className="flex justify-between items-center px-5 py-2 cursor-pointer bg-gray-800/30"
+              onClick={() => toggleGroup(group.name)}
+            >
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-gray-200">{group.name}</span>
+                <span className="bg-gray-700 text-gray-300 text-xs px-1.5 py-0.5 rounded-full">
+                  {group.keys.length}
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-gray-500 uppercase">
+                  {group.name === 'Project' ? `Unallocated ${formatCurrency(totalInflow - budgets.Living - budgets.Housing)}` : ''}
+                </span>
+                {expandedGroups[group.name] ? <ChevronUp size={16} className="text-gray-500" /> : <ChevronDown size={16} className="text-gray-500" />}
+              </div>
+            </div>
+
+            {/* Accordion Content */}
+            {expandedGroups[group.name] && (
+              <div className="px-5">
+                {group.keys.map(key => {
+                  const expense = expenses.find(e => e.category === key);
+                  if (!expense) return null;
+                  
+                  const budget = budgets[key];
+                  const Icon = expense.icon;
+                  const displayName = expense.label || expense.category;
+
+                  return (
+                    <div key={key} className="flex items-center justify-between py-4 border-b border-gray-800/50 last:border-0">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${expense.bg} ${expense.color}`}>
+                          <Icon size={20} />
+                        </div>
+                        <div>
+                          <div className="font-medium text-gray-200">{displayName}</div>
+                          <div className="text-xs text-gray-500 mt-0.5">{expense.items} Items</div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-medium text-[#FF4D4D]">
+                          {formatCurrency(expense.amount)}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-0.5">
+                          {budget > 0 ? `${expense.amount.toFixed(2)} / ${budget}` : 'Unallocated'}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+
+const Settings = ({ setView, budgets, setBudgets }) => {
+  const [localBudgets, setLocalBudgets] = useState({ ...budgets });
+
+  const handleChange = (category, value) => {
+    const numValue = value === '' ? 0 : parseFloat(value);
+    setLocalBudgets(prev => ({ ...prev, [category]: numValue }));
+  };
+
+  const handleSave = () => {
+    setBudgets(localBudgets);
+    setView('dashboard');
+  };
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="flex items-center p-4 pt-6 border-b border-gray-800 bg-[#1A1A24] sticky top-0 z-10">
+        <button onClick={() => setView('dashboard')} className="p-2 -ml-2 text-gray-400 hover:text-white">
+          <ChevronLeft size={24} />
+        </button>
+        <h1 className="text-lg font-semibold tracking-wide ml-2">Budget Settings</h1>
+      </div>
+
+      {/* Content */}
+      <div className="p-5 overflow-y-auto flex-1">
+        <p className="text-sm text-gray-400 mb-6">Adjust your monthly quota for each category.</p>
+        
+        <div className="space-y-4">
+          {Object.entries(localBudgets).map(([key, value]) => {
+            const displayName = key === 'BBNecessities' ? 'BB Necessities' : key;
+            return (
+              <div key={key} className="flex flex-col gap-1.5">
+                <label className="text-sm text-gray-300 font-medium">{displayName}</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">HK$</span>
+                  <input 
+                    type="number" 
+                    value={value || ''}
+                    onChange={(e) => handleChange(key, e.target.value)}
+                    className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg py-2.5 pl-12 pr-4 focus:outline-none focus:border-purple-500 transition-colors"
+                    placeholder="0.00"
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Footer / Save */}
+      <div className="p-5 bg-[#1A1A24] border-t border-gray-800 sticky bottom-0">
+        <button 
+          onClick={handleSave}
+          className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-xl transition-colors shadow-lg"
+        >
+          Save Changes
+        </button>
+      </div>
+    </div>
+  );
+};
+
+
+export default function App() {
+  const [view, setView] = useState('dashboard');
+  const [budgets, setBudgets] = useState(INITIAL_BUDGETS);
+
+  return (
+    <div className="min-h-screen bg-black flex justify-center items-center p-0 sm:p-4 font-sans">
+      <div className="w-full h-[100dvh] sm:h-[850px] max-w-[400px] bg-[#1A1A24] text-gray-100 sm:rounded-[2.5rem] shadow-2xl relative overflow-hidden sm:border-[8px] border-gray-900 flex flex-col">
+        {view === 'dashboard' ? (
+          <Dashboard 
+            setView={setView} 
+            budgets={budgets} 
+            expenses={EXPENSES} 
+            incomes={INCOMES} 
+          />
+        ) : (
+          <Settings 
+            setView={setView} 
+            budgets={budgets} 
+            setBudgets={setBudgets} 
+          />
+        )}
+      </div>
+    </div>
+  );
+}
