@@ -102,13 +102,12 @@
       const width = 340;
       const padding = { top: 20, right: 15, bottom: 40, left: 15 };
 
-      // Calculate Max Value for scale
       const maxVal = useMemo(() => {
         let m = 1000;
         monthlyData.forEach(d => {
           m = Math.max(m, d.inflow, d.outflow, d.bea, Math.abs(d.happySurplus));
         });
-        return m * 1.15; // Padding space on top
+        return m * 1.15;
       }, [monthlyData]);
 
       const chartWidth = width - padding.left - padding.right;
@@ -117,7 +116,6 @@
       const barGroupWidth = Math.min(stepX * 0.65, 32);
       const singleBarWidth = barGroupWidth / 3;
 
-      // Line coordinates for Happy Surplus
       const linePoints = monthlyData.map((d, i) => {
         const x = padding.left + i * stepX + stepX / 2;
         const clampedVal = Math.max(0, d.happySurplus);
@@ -132,7 +130,7 @@
       return (
         <div className="bg-gray-900/80 border border-gray-800 rounded-2xl p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400">Monthly Overview Chart</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400">Current & Past 5 Months</h3>
             <span className="text-[10px] text-cyan-400 font-semibold bg-cyan-950/60 border border-cyan-800/50 px-2 py-0.5 rounded-full">
               Columns + Surplus Line
             </span>
@@ -140,7 +138,6 @@
 
           <div className="relative flex justify-center">
             <svg width={width} height={height} className="overflow-visible">
-              {/* Background Grid Lines */}
               {[0, 0.33, 0.66, 1].map((ratio, idx) => {
                 const y = padding.top + chartHeight * (1 - ratio);
                 return (
@@ -150,7 +147,6 @@
                 );
               })}
 
-              {/* Bars (Inflow, Outflow, BEA) */}
               {monthlyData.map((d, i) => {
                 const groupCenterX = padding.left + i * stepX + stepX / 2;
                 const startX = groupCenterX - barGroupWidth / 2;
@@ -165,36 +161,17 @@
 
                 return (
                   <g key={d.month}>
-                    {/* Inflow Bar */}
                     <rect x={startX} y={yInflow} width={singleBarWidth - 1} height={Math.max(hInflow, 2)} fill="#10B981" rx="2" />
-                    
-                    {/* Outflow Bar */}
                     <rect x={startX + singleBarWidth} y={yOutflow} width={singleBarWidth - 1} height={Math.max(hOutflow, 2)} fill="#EF4444" rx="2" />
-                    
-                    {/* BEA Bar */}
                     <rect x={startX + singleBarWidth * 2} y={yBea} width={singleBarWidth - 1} height={Math.max(hBea, 2)} fill="#8B5CF6" rx="2" />
-
-                    {/* Month Label */}
-                    <text 
-                      x={groupCenterX} 
-                      y={height - 12} 
-                      fill="#94A3B8" 
-                      fontSize="10" 
-                      textAnchor="middle" 
-                      fontWeight="500"
-                    >
+                    <text x={groupCenterX} y={height - 12} fill="#94A3B8" fontSize="10" textAnchor="middle" fontWeight="500">
                       {d.label}
                     </text>
                   </g>
                 );
               })}
 
-              {/* Happy Surplus Overlay Line */}
-              {svgLinePath && (
-                <path d={svgLinePath} fill="none" stroke="#00F0FF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-              )}
-
-              {/* Line Node Points */}
+              {svgLinePath && <path d={svgLinePath} fill="none" stroke="#00F0FF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />}
               {linePoints.map((pt, i) => (
                 <g key={i}>
                   <circle cx={pt.x} cy={pt.y} r="4" fill="#00F0FF" stroke="#1A1A24" strokeWidth="2" />
@@ -203,50 +180,35 @@
             </svg>
           </div>
 
-          {/* Chart Legend */}
           <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-800 text-[11px]">
-            <div className="flex items-center space-x-1.5">
-              <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500 inline-block"></span>
-              <span className="text-gray-300">Inflow (Green)</span>
-            </div>
-            <div className="flex items-center space-x-1.5">
-              <span className="w-2.5 h-2.5 rounded-sm bg-red-500 inline-block"></span>
-              <span className="text-gray-300">Outflow (Red)</span>
-            </div>
-            <div className="flex items-center space-x-1.5">
-              <span className="w-2.5 h-2.5 rounded-sm bg-purple-500 inline-block"></span>
-              <span className="text-gray-300">BEA Transfer (Purple)</span>
-            </div>
-            <div className="flex items-center space-x-1.5">
-              <span className="w-2.5 h-0.5 bg-cyan-400 inline-block"></span>
-              <span className="text-cyan-400 font-medium">Happy Surplus (Line)</span>
-            </div>
+            <div className="flex items-center space-x-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-emerald-500 inline-block"></span><span className="text-gray-300">Inflow (Green)</span></div>
+            <div className="flex items-center space-x-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-red-500 inline-block"></span><span className="text-gray-300">Outflow (Red)</span></div>
+            <div className="flex items-center space-x-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-purple-500 inline-block"></span><span className="text-gray-300">BEA Transfer (Purple)</span></div>
+            <div className="flex items-center space-x-1.5"><span className="w-2.5 h-0.5 bg-cyan-400 inline-block"></span><span className="text-cyan-400 font-medium">Happy Surplus (Line)</span></div>
           </div>
         </div>
       );
     }
 
     function App() {
-      // Core State
-      const [view, setView] = useState('input'); // 'input', 'dashboard', 'analytics', 'settings', 'history', 'edit'
+      const [view, setView] = useState('input');
       
       const [transactions, setTransactions] = useState(() => {
         const saved = localStorage.getItem('et_transactions');
         return saved ? JSON.parse(saved) : [];
       });
 
+      // Merge saved budgets with INITIAL_BUDGETS to guarantee new categories (like Loan) appear
       const [budgets, setBudgets] = useState(() => {
         const saved = localStorage.getItem('et_budgets');
-        return saved ? JSON.parse(saved) : INITIAL_BUDGETS;
+        return saved ? { ...INITIAL_BUDGETS, ...JSON.parse(saved) } : INITIAL_BUDGETS;
       });
 
-      // Transfer to BEA persisted state per month: { 'YYYY-MM': amount }
       const [beaTransfers, setBeaTransfers] = useState(() => {
         const saved = localStorage.getItem('et_bea_transfers');
         return saved ? JSON.parse(saved) : {};
       });
 
-      // Form State
       const [formId, setFormId] = useState(null);
       const [formType, setFormType] = useState('expense');
       const [formCategory, setFormCategory] = useState('Meals');
@@ -254,21 +216,15 @@
       const [formDate, setFormDate] = useState(getTodayDate());
       const [formRemark, setFormRemark] = useState('');
 
-      // UI State
       const [expandedGroups, setExpandedGroups] = useState({ Project: true, Unallocated: true, Unset: true });
       const [showRemarks, setShowRemarks] = useState(false);
-      const [viewMonth, setViewMonth] = useState(() => getTodayDate().substring(0, 7)); // 'YYYY-MM'
+      const [viewMonth, setViewMonth] = useState(() => getTodayDate().substring(0, 7));
 
-      // Persistence
       useEffect(() => { localStorage.setItem('et_transactions', JSON.stringify(transactions)); }, [transactions]);
       useEffect(() => { localStorage.setItem('et_budgets', JSON.stringify(budgets)); }, [budgets]);
       useEffect(() => { localStorage.setItem('et_bea_transfers', JSON.stringify(beaTransfers)); }, [beaTransfers]);
 
-      // Derived Data for Dashboard (Filtered by viewMonth)
-      const currentMonthTxs = useMemo(() => {
-        return transactions.filter(t => t.date.startsWith(viewMonth));
-      }, [transactions, viewMonth]);
-
+      const currentMonthTxs = useMemo(() => transactions.filter(t => t.date.startsWith(viewMonth)), [transactions, viewMonth]);
       const expenses = currentMonthTxs.filter(t => t.type === 'expense');
       const incomes = currentMonthTxs.filter(t => t.type === 'income');
 
@@ -276,11 +232,10 @@
       const totalInflow = incomes.reduce((sum, t) => sum + Number(t.amount), 0);
       const netTotal = totalInflow - totalOutflow;
 
-      // Current month's BEA transfer
       const currentBeaTransfer = Number(beaTransfers[viewMonth] || 0);
       const happySurplus = netTotal - currentBeaTransfer;
 
-      // Monthly aggregates for Column-Line Chart (Last 6 Months)
+      // 6-Month rolling view data strictly for the chart
       const monthlyComparisonData = useMemo(() => {
         const result = [];
         const curr = new Date(viewMonth + '-01');
@@ -297,20 +252,36 @@
           const bea = Number(beaTransfers[monthKey] || 0);
           const surplus = summary - bea;
 
-          result.push({
-            month: monthKey,
-            label,
-            inflow,
-            outflow,
-            summary,
-            bea,
-            happySurplus: surplus
-          });
+          result.push({ month: monthKey, label, inflow, outflow, summary, bea, happySurplus: surplus });
         }
         return result;
       }, [transactions, beaTransfers, viewMonth]);
 
-      // Handlers
+      // Complete historical list of all recorded months
+      const allHistoricalMonthsData = useMemo(() => {
+        const monthSet = new Set();
+        transactions.forEach(t => monthSet.add(t.date.substring(0, 7)));
+        Object.keys(beaTransfers).forEach(m => monthSet.add(m));
+        
+        if (monthSet.size === 0) monthSet.add(viewMonth);
+
+        const sortedMonths = Array.from(monthSet).sort().reverse();
+
+        return sortedMonths.map(monthKey => {
+          const d = new Date(monthKey + '-01');
+          const label = d.toLocaleString('default', { month: 'long', year: 'numeric' });
+          
+          const monthTxs = transactions.filter(t => t.date.startsWith(monthKey));
+          const inflow = monthTxs.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0);
+          const outflow = monthTxs.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
+          const summary = inflow - outflow;
+          const bea = Number(beaTransfers[monthKey] || 0);
+          const surplus = summary - bea;
+
+          return { month: monthKey, label, inflow, outflow, summary, bea, happySurplus: surplus };
+        });
+      }, [transactions, beaTransfers, viewMonth]);
+
       const handleBeaTransferChange = (val) => {
         const numVal = Math.max(0, Number(val) || 0);
         setBeaTransfers(prev => ({ ...prev, [viewMonth]: numVal }));
@@ -363,7 +334,6 @@
         setView('edit');
       };
 
-      // Top Bar Navigation
       const renderTopBar = () => {
         let title, leftBtn, rightBtns;
         
@@ -413,34 +383,19 @@
 
       const renderForm = () => (
         <div className="flex-1 p-5 space-y-6 overflow-y-auto no-scrollbar">
-          {/* Type Toggle */}
           <div className="flex bg-gray-900 rounded-xl p-1 border border-gray-800">
-            <button 
-              onClick={() => setFormType('expense')}
-              className={`flex-1 py-2 rounded-lg text-sm font-semibold transition ${formType === 'expense' ? 'bg-red-500/20 text-red-400 shadow' : 'text-gray-500 hover:text-gray-300'}`}
-            >Expense</button>
-            <button 
-              onClick={() => setFormType('income')}
-              className={`flex-1 py-2 rounded-lg text-sm font-semibold transition ${formType === 'income' ? 'bg-emerald-500/20 text-emerald-400 shadow' : 'text-gray-500 hover:text-gray-300'}`}
-            >Income</button>
+            <button onClick={() => setFormType('expense')} className={`flex-1 py-2 rounded-lg text-sm font-semibold transition ${formType === 'expense' ? 'bg-red-500/20 text-red-400 shadow' : 'text-gray-500 hover:text-gray-300'}`}>Expense</button>
+            <button onClick={() => setFormType('income')} className={`flex-1 py-2 rounded-lg text-sm font-semibold transition ${formType === 'income' ? 'bg-emerald-500/20 text-emerald-400 shadow' : 'text-gray-500 hover:text-gray-300'}`}>Income</button>
           </div>
 
-          {/* Amount */}
           <div className="space-y-2">
             <label className="text-xs text-gray-400 font-medium ml-1">Amount</label>
             <div className="flex items-center bg-gray-900/50 border border-gray-800 rounded-xl px-4 py-3">
               <span className={`text-lg font-bold mr-2 ${formType === 'expense' ? 'text-red-400' : 'text-emerald-400'}`}>HK$</span>
-              <input 
-                type="number" 
-                placeholder="0.00" 
-                value={formAmount} 
-                onChange={(e) => setFormAmount(e.target.value)}
-                className="bg-transparent flex-1 text-2xl text-white focus:outline-none"
-              />
+              <input type="number" placeholder="0.00" value={formAmount} onChange={(e) => setFormAmount(e.target.value)} className="bg-transparent flex-1 text-2xl text-white focus:outline-none" />
             </div>
           </div>
 
-          {/* Category (Only if Expense) */}
           {formType === 'expense' && (
             <div className="space-y-2">
               <label className="text-xs text-gray-400 font-medium ml-1">Category</label>
@@ -449,11 +404,7 @@
                   const Icon = Icons[data.icon] || Icons.More;
                   const isSelected = formCategory === key;
                   return (
-                    <button 
-                      key={key} 
-                      onClick={() => setFormCategory(key)}
-                      className={`flex flex-col items-center justify-center p-3 rounded-xl border transition ${isSelected ? `border-gray-500 ${data.bg}` : 'border-gray-800 bg-gray-900/40 hover:bg-gray-800'}`}
-                    >
+                    <button key={key} onClick={() => setFormCategory(key)} className={`flex flex-col items-center justify-center p-3 rounded-xl border transition ${isSelected ? `border-gray-500 ${data.bg}` : 'border-gray-800 bg-gray-900/40 hover:bg-gray-800'}`}>
                       <div className={`mb-1 ${isSelected ? data.color : 'text-gray-500'}`}><Icon /></div>
                       <span className={`text-[10px] ${isSelected ? 'text-white font-medium' : 'text-gray-500'}`}>{data.label}</span>
                     </button>
@@ -463,40 +414,23 @@
             </div>
           )}
 
-          {/* Date */}
           <div className="space-y-2">
             <label className="text-xs text-gray-400 font-medium ml-1">Date</label>
-            <input 
-              type="date" 
-              value={formDate} 
-              onChange={(e) => setFormDate(e.target.value)}
-              className="w-full bg-gray-900/50 border border-gray-800 rounded-xl px-4 py-3 text-white focus:outline-none"
-            />
+            <input type="date" value={formDate} onChange={(e) => setFormDate(e.target.value)} className="w-full bg-gray-900/50 border border-gray-800 rounded-xl px-4 py-3 text-white focus:outline-none" />
           </div>
 
-          {/* Remarks */}
           <div className="space-y-2">
             <label className="text-xs text-gray-400 font-medium ml-1">Remarks (Optional)</label>
-            <input 
-              type="text" 
-              placeholder="What was this for?" 
-              value={formRemark} 
-              onChange={(e) => setFormRemark(e.target.value)}
-              className="w-full bg-gray-900/50 border border-gray-800 rounded-xl px-4 py-3 text-white focus:outline-none"
-            />
+            <input type="text" placeholder="What was this for?" value={formRemark} onChange={(e) => setFormRemark(e.target.value)} className="w-full bg-gray-900/50 border border-gray-800 rounded-xl px-4 py-3 text-white focus:outline-none" />
           </div>
 
-          {/* Actions */}
           <div className="pt-4 flex gap-3">
             {view === 'edit' && (
               <button onClick={() => handleDelete(formId)} className="p-3 bg-red-900/30 text-red-400 border border-red-900 rounded-xl hover:bg-red-900/50 transition">
                 <Icons.Trash />
               </button>
             )}
-            <button 
-              onClick={handleSave}
-              className="flex-1 bg-purple-600 hover:bg-purple-500 text-white font-semibold py-3 rounded-xl shadow-lg transition"
-            >
+            <button onClick={handleSave} className="flex-1 bg-purple-600 hover:bg-purple-500 text-white font-semibold py-3 rounded-xl shadow-lg transition">
               {view === 'edit' ? 'Update Record' : 'Save Record'}
             </button>
           </div>
@@ -507,40 +441,29 @@
         <div className="flex flex-col h-full text-slate-100 select-none">
           {renderTopBar()}
 
-          {/* --- INPUT & EDIT VIEWS --- */}
           {(view === 'input' || view === 'edit') && renderForm()}
 
-          {/* --- DASHBOARD VIEW --- */}
           {view === 'dashboard' && (
             <div className="flex-1 overflow-y-auto no-scrollbar pb-10">
-              {/* Month Selector */}
               <div className="flex items-center justify-between px-6 py-3 text-sm text-gray-400 border-b border-gray-800/60 bg-[#161620]">
-                <button 
-                  className="p-1 hover:text-white"
-                  onClick={() => {
-                    let [y, m] = viewMonth.split('-');
-                    m = Number(m) - 1;
-                    if(m === 0) { m = 12; y = Number(y) - 1; }
-                    setViewMonth(`${y}-${m.toString().padStart(2, '0')}`);
-                  }}
-                ><Icons.ChevronLeft /></button>
+                <button className="p-1 hover:text-white" onClick={() => {
+                  let [y, m] = viewMonth.split('-');
+                  m = Number(m) - 1;
+                  if(m === 0) { m = 12; y = Number(y) - 1; }
+                  setViewMonth(`${y}-${m.toString().padStart(2, '0')}`);
+                }}><Icons.ChevronLeft /></button>
                 <span className="font-medium tracking-wider text-gray-300">
                   {new Date(viewMonth + '-01').toLocaleString('default', { month: 'long', year: 'numeric' })}
                 </span>
-                <button 
-                  className="p-1 hover:text-white"
-                  onClick={() => {
-                    let [y, m] = viewMonth.split('-');
-                    m = Number(m) + 1;
-                    if(m === 13) { m = 1; y = Number(y) + 1; }
-                    setViewMonth(`${y}-${m.toString().padStart(2, '0')}`);
-                  }}
-                ><Icons.ChevronRight /></button>
+                <button className="p-1 hover:text-white" onClick={() => {
+                  let [y, m] = viewMonth.split('-');
+                  m = Number(m) + 1;
+                  if(m === 13) { m = 1; y = Number(y) + 1; }
+                  setViewMonth(`${y}-${m.toString().padStart(2, '0')}`);
+                }}><Icons.ChevronRight /></button>
               </div>
 
-              {/* Summary Bars */}
               <div className="p-4 space-y-3 bg-[#1A1A24]">
-                {/* Outflow */}
                 <div className="space-y-1">
                   <div className="flex justify-between items-center text-xs">
                     <div className="flex items-center gap-2">
@@ -554,7 +477,6 @@
                   </div>
                 </div>
 
-                {/* Inflow */}
                 <div className="space-y-1">
                   <div className="flex justify-between items-center text-xs">
                     <div className="flex items-center gap-2">
@@ -585,7 +507,6 @@
                   )}
                 </div>
 
-                {/* Summary Bar */}
                 <div className="space-y-1 pt-1">
                   <div className="flex justify-between items-center text-xs">
                     <div className="flex items-center gap-2">
@@ -601,33 +522,21 @@
                   </div>
                 </div>
 
-                {/* 1. Transfer to BEA Input Space */}
                 <div className="pt-2">
                   <div className="bg-purple-950/30 border border-purple-800/40 rounded-xl p-3 flex justify-between items-center">
                     <div className="flex items-center space-x-2">
-                      <div className="p-1.5 bg-purple-500/20 text-purple-400 rounded-lg">
-                        <Icons.Bank />
-                      </div>
+                      <div className="p-1.5 bg-purple-500/20 text-purple-400 rounded-lg"><Icons.Bank /></div>
                       <label className="text-xs font-semibold text-purple-200">Transfer to BEA</label>
                     </div>
                     <div className="flex items-center space-x-1 bg-gray-900/80 border border-purple-900/60 rounded-lg px-2 py-1">
                       <span className="text-xs text-purple-400 font-medium">HK$</span>
-                      <input 
-                        type="number"
-                        placeholder="0.00"
-                        value={beaTransfers[viewMonth] || ''}
-                        onChange={(e) => handleBeaTransferChange(e.target.value)}
-                        className="w-24 bg-transparent text-right text-sm font-bold text-white focus:outline-none"
-                      />
+                      <input type="number" placeholder="0.00" value={beaTransfers[viewMonth] || ''} onChange={(e) => handleBeaTransferChange(e.target.value)} className="w-24 bg-transparent text-right text-sm font-bold text-white focus:outline-none" />
                     </div>
                   </div>
                 </div>
 
-                {/* 2. Happy Surplus Display */}
                 <div className="mt-2 bg-gradient-to-r from-cyan-950/60 via-slate-900 to-cyan-950/60 border border-cyan-500/40 rounded-xl p-3.5 text-center shadow-lg relative overflow-hidden">
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-cyan-300/80 mb-0.5">
-                    Happy Surplus
-                  </div>
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-cyan-300/80 mb-0.5">Happy Surplus</div>
                   <div className="text-2xl font-black text-[#00F0FF] glow-surplus tracking-tight my-1">
                     {happySurplus >= 0 ? '' : '-'}{formatCurrency(Math.abs(happySurplus))}
                   </div>
@@ -637,11 +546,9 @@
                 </div>
               </div>
 
-              {/* Expense Category Groups */}
               <div className="mt-2 divide-y divide-gray-800/60">
                 {GROUPS.map((group) => {
                   const isExpanded = expandedGroups[group.name];
-                  
                   let groupTotal = 0;
                   const groupCats = group.keys.map(key => {
                     const catTxs = expenses.filter(t => t.category === key);
@@ -662,7 +569,6 @@
                           <span className="text-gray-500">{isExpanded ? <Icons.ChevronUp /> : <Icons.ChevronDown />}</span>
                         </div>
                       </button>
-
                       {isExpanded && (
                         <div className="divide-y divide-gray-800/40 px-2">
                           {groupCats.length === 0 ? (
@@ -693,12 +599,8 @@
                 })}
               </div>
 
-              {/* Navigation button to Monthly Analytics */}
               <div className="p-4">
-                <button 
-                  onClick={() => setView('analytics')}
-                  className="w-full bg-gradient-to-r from-cyan-900/40 to-purple-900/40 border border-cyan-500/30 text-cyan-300 py-3 rounded-xl font-semibold text-xs flex items-center justify-center space-x-2 hover:bg-cyan-900/60 transition shadow"
-                >
+                <button onClick={() => setView('analytics')} className="w-full bg-gradient-to-r from-cyan-900/40 to-purple-900/40 border border-cyan-500/30 text-cyan-300 py-3 rounded-xl font-semibold text-xs flex items-center justify-center space-x-2 hover:bg-cyan-900/60 transition shadow">
                   <Icons.BarChart />
                   <span>View Full Monthly Comparison Chart</span>
                 </button>
@@ -706,7 +608,7 @@
             </div>
           )}
 
-          {/* --- 4. MONTHLY COMPARISON PAGE (COLUMN-LINE CHART) --- */}
+          {/* --- MONTHLY COMPARISON PAGE --- */}
           {view === 'analytics' && (
             <div className="flex-1 overflow-y-auto no-scrollbar p-4 space-y-5">
               <div className="text-center space-y-1">
@@ -714,17 +616,17 @@
                 <p className="text-xs text-gray-400">Inflow, Outflow, BEA Transfer & Happy Surplus Trend</p>
               </div>
 
-              {/* Column-Line Chart Component */}
+              {/* Chart displays restricted 6-month window */}
               <ColumnLineChart monthlyData={monthlyComparisonData} />
 
-              {/* Detailed Breakdown List */}
+              {/* List underneath displays ALL historical data from transactions */}
               <div className="space-y-3">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 px-1">Monthly Breakdown Data</h3>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 px-1">All Historical Breakdown Data</h3>
                 <div className="space-y-2">
-                  {monthlyComparisonData.slice().reverse().map(m => (
+                  {allHistoricalMonthsData.map(m => (
                     <div key={m.month} className="bg-gray-900/60 border border-gray-800 rounded-xl p-3 space-y-2">
                       <div className="flex justify-between items-center border-b border-gray-800/60 pb-2">
-                        <span className="text-sm font-bold text-gray-200">{m.label} ({m.month})</span>
+                        <span className="text-sm font-bold text-gray-200">{m.label}</span>
                         <span className="text-xs font-bold text-[#00F0FF]">
                           Happy Surplus: {formatCurrency(m.happySurplus)}
                         </span>
@@ -750,7 +652,6 @@
             </div>
           )}
 
-          {/* --- HISTORY VIEW --- */}
           {view === 'history' && (
             <div className="flex-1 overflow-y-auto no-scrollbar p-2">
               {transactions.length === 0 ? (
@@ -785,26 +686,30 @@
             </div>
           )}
 
-          {/* --- SETTINGS VIEW --- */}
           {view === 'settings' && (
              <div className="flex-1 overflow-y-auto no-scrollbar p-4 space-y-6">
               <div>
                 <h2 className="text-base font-semibold text-purple-400 mb-1">Monthly Category Budgets</h2>
                 <p className="text-xs text-gray-400 mb-4">Set your spending quotas per category.</p>
                 <div className="space-y-3">
-                  {Object.entries(budgets).map(([key, val]) => (
-                    <div key={key} className="bg-gray-900/60 p-3 rounded-xl border border-gray-800 flex justify-between items-center">
-                      <label className="text-sm font-medium text-gray-200">{CATEGORIES[key]?.label || key}</label>
-                      <div className="flex items-center space-x-2">
-                        <span className="text-xs text-gray-500">HK$</span>
-                        <input 
-                          type="number" value={val}
-                          onChange={(e) => setBudgets({ ...budgets, [key]: Number(e.target.value) })}
-                          className="w-28 bg-gray-800 text-white text-right px-3 py-1.5 rounded-lg text-sm border border-gray-700 focus:outline-none focus:border-purple-500"
-                        />
+                  {/* Maps directly via CATEGORIES keys to ensure newly added categories display properly regardless of old localStorage */}
+                  {Object.keys(CATEGORIES).map((key) => {
+                    const val = budgets[key] || 0;
+                    return (
+                      <div key={key} className="bg-gray-900/60 p-3 rounded-xl border border-gray-800 flex justify-between items-center">
+                        <label className="text-sm font-medium text-gray-200">{CATEGORIES[key].label}</label>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-xs text-gray-500">HK$</span>
+                          <input 
+                            type="number" 
+                            value={val}
+                            onChange={(e) => setBudgets({ ...budgets, [key]: Number(e.target.value) })}
+                            className="w-28 bg-gray-800 text-white text-right px-3 py-1.5 rounded-lg text-sm border border-gray-700 focus:outline-none focus:border-purple-500"
+                          />
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>
